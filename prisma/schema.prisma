@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Player {
+  puuid          String   @id
+  gameName       String
+  tagLine        String
+  platformRegion String
+  profileIconId  Int
+  summonerLevel  Int
+  updatedAt      DateTime @updatedAt
+  createdAt      DateTime @default(now())
+
+  ranks Rank[]
+
+  @@unique([gameName, tagLine, platformRegion])
+}
+
+model Rank {
+  id           String @id @default(cuid())
+  playerPuuid  String
+  player       Player @relation(fields: [playerPuuid], references: [puuid], onDelete: Cascade)
+  queueType    String
+  tier         String
+  rank         String
+  leaguePoints Int
+  wins         Int
+  losses       Int
+
+  @@unique([playerPuuid, queueType])
+}
+
+model Match {
+  matchId      String   @id
+  gameCreation BigInt
+  gameDuration Int
+  gameVersion  String
+  queueId      Int
+  platformId   String
+  rawData      Json
+  createdAt    DateTime @default(now())
+
+  participants MatchParticipant[]
+  timeline     MatchTimeline?
+}
+
+model MatchTimeline {
+  matchId   String   @id
+  match     Match    @relation(fields: [matchId], references: [matchId], onDelete: Cascade)
+  rawData   Json
+  createdAt DateTime @default(now())
+}
+
+model AiCoachSummary {
+  puuid             String   @id
+  summaryText       String
+  basedOnMatchCount Int
+  generatedAt       DateTime @default(now())
+}
+
+model MatchParticipant {
+  id                          String  @id @default(cuid())
+  matchId                     String
+  match                       Match   @relation(fields: [matchId], references: [matchId], onDelete: Cascade)
+  puuid                       String
+  championName                String
+  teamPosition                String
+  teamId                      Int
+  win                         Boolean
+  kills                       Int
+  deaths                      Int
+  assists                     Int
+  cs                          Int
+  goldEarned                  Int
+  totalDamageDealtToChampions Int
+  visionScore                 Int
+  champExperience             Int
+  wardsPlaced                 Int
+  wardsKilled                 Int
+  killParticipation           Float
+  dragonTakedowns             Int
+  baronTakedowns              Int
+  turretTakedowns             Int
+  riftHeraldTakedowns         Int
+
+  @@unique([matchId, puuid])
+  @@index([puuid])
+  @@index([championName, teamPosition])
+}
