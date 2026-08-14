@@ -23,13 +23,12 @@ export async function searchAndSyncPlayer(
     regionalUrl(regional, `/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`)
   );
 
-  const summoner = await riotClient.get<SummonerDto>(
-    platformUrl(platform, `/lol/summoner/v4/summoners/by-puuid/${account.puuid}`)
-  );
-
-  const leagueEntries = await riotClient.get<LeagueEntryDto[]>(
-    platformUrl(platform, `/lol/league/v4/entries/by-puuid/${account.puuid}`)
-  );
+  // Independent of each other once we have the puuid — run concurrently
+  // instead of chaining two sequential cross-Pacific round trips.
+  const [summoner, leagueEntries] = await Promise.all([
+    riotClient.get<SummonerDto>(platformUrl(platform, `/lol/summoner/v4/summoners/by-puuid/${account.puuid}`)),
+    riotClient.get<LeagueEntryDto[]>(platformUrl(platform, `/lol/league/v4/entries/by-puuid/${account.puuid}`)),
+  ]);
 
   const player = await prisma.player.upsert({
     where: { puuid: account.puuid },

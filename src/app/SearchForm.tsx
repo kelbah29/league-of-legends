@@ -61,8 +61,14 @@ export default function SearchForm() {
         <button
           type="submit"
           disabled={loading}
-          className="rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-bg transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex items-center justify-center gap-2 rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-bg transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
         >
+          {loading && (
+            <span
+              aria-hidden
+              className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-bg/40 border-t-bg"
+            />
+          )}
           {loading ? "Aranıyor..." : "Ara"}
         </button>
       </form>
