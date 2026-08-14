@@ -11,20 +11,31 @@ export default async function Home() {
   });
 
   return (
-    <main style={{ maxWidth: 480, margin: "80px auto", padding: "0 16px", fontFamily: "system-ui, sans-serif" }}>
-      <h1>AI League Coach</h1>
-      <p style={{ color: "#666" }}>Riot ID&apos;ni gir, profilini ve son maçlarını çekelim.</p>
+    <main className="mx-auto max-w-md px-4 py-20">
+      <h1 className="text-2xl font-bold text-text-primary">AI League Coach</h1>
+      <p className="mt-2 text-sm text-text-secondary">
+        Riot ID&apos;ni gir, profilini ve son maçlarını çekelim.
+      </p>
 
-      <SearchForm />
+      <div className="mt-6 rounded-lg border border-border bg-surface p-5">
+        <SearchForm />
+      </div>
 
       {recentPlayers.length > 0 && (
-        <section style={{ marginTop: 40 }}>
-          <h2 style={{ fontSize: 16 }}>Son Aramalar</h2>
-          <ul style={{ listStyle: "none", padding: 0 }}>
+        <section className="mt-8">
+          <h2 className="text-sm font-semibold text-text-secondary">Son Aramalar</h2>
+          <ul className="mt-2 overflow-hidden rounded-lg border border-border">
             {recentPlayers.map((p) => (
-              <li key={p.puuid} style={{ padding: "6px 0", borderBottom: "1px solid #eee" }}>
-                <Link href={`/player/${p.puuid}`}>
-                  {p.gameName}#{p.tagLine} · {p.platformRegion.toUpperCase()}
+              <li key={p.puuid} className="border-b border-border last:border-b-0">
+                <Link
+                  href={`/player/${p.puuid}`}
+                  className="flex items-center justify-between px-4 py-3 text-sm text-text-primary transition-colors hover:bg-surface-hover"
+                >
+                  <span>
+                    {p.gameName}
+                    <span className="text-text-muted">#{p.tagLine}</span>
+                  </span>
+                  <span className="text-xs text-text-muted">{p.platformRegion.toUpperCase()}</span>
                 </Link>
               </li>
             ))}

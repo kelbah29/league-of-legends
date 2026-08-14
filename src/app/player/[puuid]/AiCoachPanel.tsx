@@ -36,26 +36,32 @@ export default function AiCoachPanel({
   }
 
   return (
-    <section style={{ marginBottom: 24 }}>
-      <h2 style={{ marginBottom: 8 }}>AI Coach</h2>
+    <section className="mb-8 rounded-lg border border-accent/40 bg-surface p-5">
+      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-accent">
+        <span aria-hidden>✦</span> AI Coach
+      </h2>
       {summary ? (
         <>
-          <div style={{ whiteSpace: "pre-wrap", fontSize: 14, background: "#f7f8fa", padding: 12, borderRadius: 6 }}>
+          <div className="whitespace-pre-wrap rounded-md bg-bg p-4 text-sm leading-relaxed text-text-primary">
             {summary}
           </div>
           {generatedAt && (
-            <p style={{ color: "#999", fontSize: 12, marginTop: 6 }}>
+            <p className="mt-2 text-xs text-text-muted">
               Oluşturulma: {new Date(generatedAt).toLocaleString("tr-TR")}
             </p>
           )}
         </>
       ) : (
-        <p style={{ color: "#999", fontSize: 13 }}>Henüz bir AI Coach özeti oluşturulmadı.</p>
+        <p className="text-sm text-text-secondary">Henüz bir AI Coach özeti oluşturulmadı.</p>
       )}
-      <button onClick={handleGenerate} disabled={loading} style={{ padding: "8px 16px", fontSize: 14, marginTop: 8 }}>
+      <button
+        onClick={handleGenerate}
+        disabled={loading}
+        className="mt-4 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-bg transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
+      >
         {loading ? "Oluşturuluyor..." : summary ? "Yeniden oluştur" : "AI Coach özeti oluştur"}
       </button>
-      {error && <p style={{ color: "crimson", marginTop: 8, fontSize: 13 }}>{error}</p>}
+      {error && <p className="mt-2 text-sm text-loss">{error}</p>}
     </section>
   );
 }

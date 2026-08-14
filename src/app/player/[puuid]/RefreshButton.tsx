@@ -25,11 +25,15 @@ export default function RefreshButton({ puuid }: { puuid: string }) {
   }
 
   return (
-    <div style={{ marginBottom: 24 }}>
-      <button onClick={handleClick} disabled={loading} style={{ padding: "8px 16px", fontSize: 14 }}>
+    <div className="mb-6 flex items-center gap-3">
+      <button
+        onClick={handleClick}
+        disabled={loading}
+        className="rounded-md border border-border bg-surface px-4 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-60"
+      >
         {loading ? "Senkronize ediliyor..." : "Refresh matches"}
       </button>
-      {message && <p style={{ color: "#666", marginTop: 8 }}>{message}</p>}
+      {message && <p className="text-sm text-text-secondary">{message}</p>}
     </div>
   );
 }

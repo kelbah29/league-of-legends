@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 import { getMatchDetail } from "@/server/services/matchDetailService";
 import type { MacroEventType } from "@/server/services/macroService";
+import Card from "../../Card";
 
 const EVENT_LABELS: Record<MacroEventType, string> = {
   KILL: "Kill",
@@ -23,43 +25,72 @@ function formatTimestamp(ms: number): string {
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
-function TeamTable({ team, focusPuuid }: { team: { id: string; puuid: string; championName: string; teamPosition: string; win: boolean; kills: number; deaths: number; assists: number; cs: number; goldEarned: number; totalDamageDealtToChampions: number; visionScore: number }[]; focusPuuid: string }) {
+interface TeamRow {
+  id: string;
+  puuid: string;
+  championName: string;
+  teamPosition: string;
+  win: boolean;
+  kills: number;
+  deaths: number;
+  assists: number;
+  cs: number;
+  goldEarned: number;
+  totalDamageDealtToChampions: number;
+  visionScore: number;
+}
+
+function TeamTable({ title, team, focusPuuid }: { title: string; team: TeamRow[]; focusPuuid: string }) {
   return (
-    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, marginBottom: 16 }}>
-      <thead>
-        <tr style={{ textAlign: "left", borderBottom: "1px solid #ccc" }}>
-          <th>Şampiyon</th>
-          <th>Rol</th>
-          <th>KDA</th>
-          <th>CS</th>
-          <th>Gold</th>
-          <th>Damage</th>
-          <th>Vision</th>
-        </tr>
-      </thead>
-      <tbody>
-        {team.map((p) => (
-          <tr
-            key={p.id}
-            style={{
-              borderBottom: "1px solid #eee",
-              fontWeight: p.puuid === focusPuuid ? 700 : 400,
-              background: p.puuid === focusPuuid ? "#f5f8ff" : undefined,
-            }}
-          >
-            <td>{p.championName}</td>
-            <td>{p.teamPosition || "-"}</td>
-            <td>
-              {p.kills}/{p.deaths}/{p.assists}
-            </td>
-            <td>{p.cs}</td>
-            <td>{p.goldEarned}</td>
-            <td>{p.totalDamageDealtToChampions}</td>
-            <td>{p.visionScore}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <Card title={title}>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[520px] text-sm">
+          <thead>
+            <tr className="border-b border-border text-left text-xs text-text-muted">
+              <th className="pb-2 font-medium">Şampiyon</th>
+              <th className="pb-2 font-medium">Rol</th>
+              <th className="pb-2 font-medium">KDA</th>
+              <th className="pb-2 font-medium">CS</th>
+              <th className="pb-2 font-medium">Gold</th>
+              <th className="pb-2 font-medium">Damage</th>
+              <th className="pb-2 font-medium">Vision</th>
+            </tr>
+          </thead>
+          <tbody>
+            {team.map((p) => (
+              <tr
+                key={p.id}
+                className={`border-b border-border/60 last:border-b-0 ${
+                  p.puuid === focusPuuid ? "bg-accent/10 font-medium text-text-primary" : "text-text-secondary"
+                }`}
+              >
+                <td className="py-2">{p.championName}</td>
+                <td className="py-2">{p.teamPosition || "-"}</td>
+                <td className="py-2">
+                  {p.kills}/{p.deaths}/{p.assists}
+                </td>
+                <td className="py-2">{p.cs}</td>
+                <td className="py-2">{p.goldEarned}</td>
+                <td className="py-2">{p.totalDamageDealtToChampions}</td>
+                <td className="py-2">{p.visionScore}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Card>
+  );
+}
+
+function StatTile({ label, value, badge }: { label: string; value: string; badge?: ReactNode }) {
+  return (
+    <div>
+      <p className="text-lg font-bold text-text-primary">
+        {value}
+        {badge}
+      </p>
+      <p className="text-xs text-text-muted">{label}</p>
+    </div>
   );
 }
 
@@ -75,83 +106,90 @@ export default async function MatchDetailPage({
   const { match, focus, metrics, csBenchmark, ownTeam, enemyTeam, macroEvents, timelineAvailable } = detail;
 
   return (
-    <main style={{ maxWidth: 800, margin: "40px auto", padding: "0 16px", fontFamily: "system-ui, sans-serif" }}>
-      <Link href={`/player/${puuid}`}>&larr; Profile&apos;e dön</Link>
+    <main className="mx-auto max-w-4xl px-4 py-10">
+      <Link href={`/player/${puuid}`} className="text-sm text-text-secondary hover:text-accent">
+        &larr; Profile&apos;e dön
+      </Link>
 
-      <h1 style={{ marginTop: 12 }}>
-        {focus.championName} · {focus.win ? "Victory" : "Defeat"}
-      </h1>
-      <p style={{ color: "#666" }}>
+      <div className="mt-3 flex items-center gap-3">
+        <h1 className="text-2xl font-bold text-text-primary">{focus.championName}</h1>
+        <span
+          className={`rounded px-2 py-1 text-xs font-semibold ${
+            focus.win ? "bg-win/15 text-win" : "bg-loss/15 text-loss"
+          }`}
+        >
+          {focus.win ? "Victory" : "Defeat"}
+        </span>
+      </div>
+      <p className="mt-1 text-sm text-text-secondary">
         {new Date(Number(match.gameCreation)).toLocaleString("tr-TR")} · {Math.round(match.gameDuration / 60)} dk ·
         Patch {match.gameVersion.split(".").slice(0, 2).join(".")}
       </p>
 
-      <section style={{ display: "flex", gap: 24, flexWrap: "wrap", margin: "16px 0", fontSize: 14 }}>
-        <div>
-          KDA: <strong>{focus.kills}/{focus.deaths}/{focus.assists}</strong> ({metrics.kda.toFixed(1)})
-        </div>
-        <div>
-          CS/min: <strong>{metrics.csPerMin.toFixed(1)}</strong>
-          {!csBenchmark.insufficientData && csBenchmark.diffPercent !== null && (
-            <span style={{ color: csBenchmark.diffPercent >= 0 ? "green" : "crimson" }}>
-              {" "}
-              ({csBenchmark.diffPercent >= 0 ? "+" : ""}
-              {csBenchmark.diffPercent.toFixed(0)}% vs benzer)
-            </span>
+      <Card className="mt-6">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <StatTile label="KDA" value={`${focus.kills}/${focus.deaths}/${focus.assists}`} />
+          <StatTile
+            label="CS/min"
+            value={metrics.csPerMin.toFixed(1)}
+            badge={
+              !csBenchmark.insufficientData &&
+              csBenchmark.diffPercent !== null && (
+                <span className={`ml-1 text-xs font-medium ${csBenchmark.diffPercent >= 0 ? "text-win" : "text-loss"}`}>
+                  {csBenchmark.diffPercent >= 0 ? "+" : ""}
+                  {csBenchmark.diffPercent.toFixed(0)}%
+                </span>
+              )
+            }
+          />
+          <StatTile label="Gold/min" value={metrics.goldPerMin.toFixed(0)} />
+          <StatTile label="Damage share" value={`${(metrics.damageShare * 100).toFixed(0)}%`} />
+          <StatTile label="Kill Participation" value={`${metrics.killParticipationPercent.toFixed(0)}%`} />
+          <StatTile label="Vision/min" value={metrics.visionScorePerMin.toFixed(2)} />
+          <StatTile label="Objective participation" value={String(metrics.objectiveParticipation)} />
+          {metrics.csAdvantage !== null && (
+            <StatTile
+              label="CS advantage (lane)"
+              value={`${metrics.csAdvantage >= 0 ? "+" : ""}${metrics.csAdvantage}`}
+            />
           )}
         </div>
-        <div>
-          Gold/min: <strong>{metrics.goldPerMin.toFixed(0)}</strong>
-        </div>
-        <div>
-          Damage share: <strong>{(metrics.damageShare * 100).toFixed(0)}%</strong>
-        </div>
-        <div>
-          Kill Participation: <strong>{metrics.killParticipationPercent.toFixed(0)}%</strong>
-        </div>
-        <div>
-          Vision/min: <strong>{metrics.visionScorePerMin.toFixed(2)}</strong>
-        </div>
-        <div>
-          Objective participation: <strong>{metrics.objectiveParticipation}</strong>
-        </div>
-        {metrics.csAdvantage !== null && (
-          <div>
-            CS advantage (lane): <strong>{metrics.csAdvantage >= 0 ? "+" : ""}{metrics.csAdvantage}</strong>
-          </div>
-        )}
-      </section>
+      </Card>
 
-      <h2>Senin Takımın</h2>
-      <TeamTable team={ownTeam} focusPuuid={puuid} />
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <TeamTable title="Senin Takımın" team={ownTeam} focusPuuid={puuid} />
+        <TeamTable title="Rakip Takım" team={enemyTeam} focusPuuid={puuid} />
+      </div>
 
-      <h2>Rakip Takım</h2>
-      <TeamTable team={enemyTeam} focusPuuid={puuid} />
-
-      <h2>Macro Timeline</h2>
-      {!timelineAvailable ? (
-        <p style={{ color: "#999", fontSize: 13 }}>
-          Bu maç için timeline verisi yok (Faz 4 öncesinde senkronize edilmiş olabilir). &quot;Refresh
-          matches&quot; timeline&apos;ı yalnızca yeni maçlar için çeker.
-        </p>
-      ) : macroEvents.length === 0 ? (
-        <p style={{ color: "#999", fontSize: 13 }}>Bu maçta önemli bir macro olayı tespit edilmedi.</p>
-      ) : (
-        <>
-          <ul style={{ listStyle: "none", padding: 0, fontSize: 13 }}>
-            {macroEvents.map((e, i) => (
-              <li key={i} style={{ padding: "4px 0", borderBottom: "1px solid #f0f0f0" }}>
-                <strong>{formatTimestamp(e.timestampMs)}</strong> — {EVENT_LABELS[e.type]}
-                {e.detail ? ` (${e.detail})` : ""}
-              </li>
-            ))}
-          </ul>
-          <p style={{ color: "#999", fontSize: 12, marginTop: 8 }}>
-            &quot;Recall (yaklaşık)&quot; Riot timeline&apos;ında ayrı bir olay tipi değildir; aynı 1 dakikalık
-            çerçevede 2+ item satın alımı reset olarak yaklaşık olarak işaretlenir.
+      <Card title="Macro Timeline" className="mt-6">
+        {!timelineAvailable ? (
+          <p className="text-sm text-text-muted">
+            Bu maç için timeline verisi yok (Faz 4 öncesinde senkronize edilmiş olabilir). &quot;Refresh
+            matches&quot; timeline&apos;ı yalnızca yeni maçlar için çeker.
           </p>
-        </>
-      )}
+        ) : macroEvents.length === 0 ? (
+          <p className="text-sm text-text-muted">Bu maçta önemli bir macro olayı tespit edilmedi.</p>
+        ) : (
+          <>
+            <ol className="ml-1.5 border-l border-border">
+              {macroEvents.map((e, i) => (
+                <li key={i} className="relative pb-4 pl-5 last:pb-0">
+                  <span className="absolute top-1 -left-[5px] h-2.5 w-2.5 rounded-full border-2 border-surface bg-accent" />
+                  <p className="text-sm">
+                    <span className="font-mono text-text-muted">{formatTimestamp(e.timestampMs)}</span>{" "}
+                    <span className="font-medium text-text-primary">{EVENT_LABELS[e.type]}</span>
+                    {e.detail && <span className="text-text-secondary"> ({e.detail})</span>}
+                  </p>
+                </li>
+              ))}
+            </ol>
+            <p className="mt-4 text-xs text-text-muted">
+              &quot;Recall (yaklaşık)&quot; Riot timeline&apos;ında ayrı bir olay tipi değildir; aynı 1 dakikalık
+              çerçevede 2+ item satın alımı reset olarak yaklaşık olarak işaretlenir.
+            </p>
+          </>
+        )}
+      </Card>
     </main>
   );
 }

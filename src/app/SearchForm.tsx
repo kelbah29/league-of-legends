@@ -40,26 +40,34 @@ export default function SearchForm() {
 
   return (
     <>
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 24 }}>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <input
           value={riotId}
           onChange={(e) => setRiotId(e.target.value)}
           placeholder="gameName#tagLine"
-          style={{ padding: 8, fontSize: 16 }}
+          className="rounded-md border border-border bg-bg px-3 py-2.5 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-accent"
         />
-        <select value={platform} onChange={(e) => setPlatform(e.target.value as typeof platform)} style={{ padding: 8, fontSize: 16 }}>
+        <select
+          value={platform}
+          onChange={(e) => setPlatform(e.target.value as typeof platform)}
+          className="rounded-md border border-border bg-bg px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent"
+        >
           {PLATFORM_ROUTES.map((p) => (
             <option key={p} value={p}>
               {p}
             </option>
           ))}
         </select>
-        <button type="submit" disabled={loading} style={{ padding: 10, fontSize: 16 }}>
+        <button
+          type="submit"
+          disabled={loading}
+          className="rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-bg transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
+        >
           {loading ? "Aranıyor..." : "Ara"}
         </button>
       </form>
 
-      {error && <p style={{ color: "crimson", marginTop: 12 }}>{error}</p>}
+      {error && <p className="mt-3 text-sm text-loss">{error}</p>}
     </>
   );
 }
