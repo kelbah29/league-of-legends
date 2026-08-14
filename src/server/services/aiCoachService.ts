@@ -78,9 +78,15 @@ async function callBedrock(systemPrompt: string, userPrompt: string): Promise<st
     body: JSON.stringify({
       messages: [{ role: "user", content: [{ text: userPrompt }] }],
       system: [{ text: systemPrompt }],
-      inferenceConfig: { maxTokens: 600, temperature: 0.4 },
+      inferenceConfig: { maxTokens: 400, temperature: 0.4 },
     }),
   });
+
+  if (res.status === 429) {
+    throw new Error(
+      "AI Coach şu anda kullanılamıyor: paylaşılan Bedrock hesabının günlük token kotası doldu. Lütfen daha sonra tekrar dene."
+    );
+  }
 
   if (!res.ok) {
     const detail = await res.text().catch(() => "");
